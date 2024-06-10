@@ -64,5 +64,18 @@ def delete(id):
     conn.close()
     return redirect(url_for('index'))
 
+@app.route('/2fa/<int:id>')
+def two_factor_auth(id):
+    conn = get_db_connection()
+    account = conn.execute('SELECT * FROM accounts WHERE id = ?', (id,)).fetchone()
+    conn.close()
+
+    if account:
+        fa_secret = account['fa_code']
+        totp = pyotp.TOTP(fa_secret)
+        return totp.now()
+
+    return "Account not found", 404
+
 if __name__ == "__main__":
     app.run(debug=True)
