@@ -1,0 +1,96 @@
+<!-- /templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Rainbow Six Accounts</title>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Rainbow Six Accounts</h1>
+        <a href="{{ url_for('add') }}" class="btn btn-primary mb-3">Add New Account</a>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Avatar</th>
+                        <th>Nickname</th>
+                        <th>Login</th>
+                        <th>Password</th>
+                        <th>2FA Code</th>
+                        <th>UID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for account in accounts %}
+                        <tr>
+                            <td><img src="{{ account.avatar }}" alt="Avatar" class="img-thumbnail" style="max-width: 50px;"></td>
+                            <td>
+                                <span id="nickname-{{ account.id }}" class="copyable">{{ account.nickname }}</span>
+                            </td>
+                            <td>
+                                <span id="login-{{ account.id }}" class="copyable">{{ account.login }}</span>
+                            </td>
+                            <td>
+                                <span id="password-{{ account.id }}" class="copyable">{{ account.password }}</span>
+                            </td>
+                            <td>
+                                <span id="fa_code-{{ account.id }}" class="copyable fa-code" data-secret="{{ account.fa_code }}">{{ account.fa_code }}</span>
+                            </td>
+                            <td>
+                                <span id="uid-{{ account.id }}" class="copyable">{{ account.uid }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('edit', id=account.id) }}" class="btn btn-warning">Edit</a>
+                                <form action="{{ url_for('delete', id=account.id) }}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/otplib@11.0.1/otplib.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            var clipboard = new ClipboardJS('.copyable', {
+                text: function(trigger) {
+                    return trigger.textContent;
+                }
+            });
+
+            clipboard.on('success', function(e) {
+                e.trigger.classList.add('copied');
+                setTimeout(() => e.trigger.classList.remove('copied'), 2000);
+            });
+
+            clipboard.on('error', function(e) {
+                console.error('Action:', e.action);
+                console.error('Trigger:', e.trigger);
+            });
+
+            const otplib = window.otplib;
+            function update2FACodes() {
+                const faCodeElements = document.querySelectorAll('.fa-code');
+                faCodeElements.forEach(el => {
+                    const secret = el.getAttribute('data-secret');
+                    el.textContent = otplib.authenticator.generate(secret);
+                });
+            }
+
+            setInterval(update2FACodes, 30000); // обновлять каждые 30 секунд
+            update2FACodes(); // начальное обновление
+        });
+    </script>
+</body>
+</html>
