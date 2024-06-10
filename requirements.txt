@@ -1,5 +1,6 @@
 Flask==2.3.2
 Flask-SQLAlchemy==2.5.1
+SQLAlchemy==1.4.47
 psycopg2-binary==2.9.1
 pyotp==2.6.0
 gunicorn==20.1.0
